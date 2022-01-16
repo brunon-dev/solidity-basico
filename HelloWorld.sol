@@ -6,6 +6,7 @@ contract HelloWorld {
     address public userAddress;
     bool public answer;
     mapping (address => uint) public hasInteracted;
+    mapping (address => uint) public balances;
 
     function setText(string memory myText) public {
         text = myText;
@@ -14,6 +15,10 @@ contract HelloWorld {
 
     function setNumber(uint myNumber) public payable {
         require(msg.value >= 1 ether, "Insufficient ETH sent");
+
+        // incrementa o saldo do endereço que chamou a função
+        balances[msg.sender] += msg.value;
+
         number = myNumber;
         setInteracted();
     }
@@ -30,6 +35,25 @@ contract HelloWorld {
 
     function setInteracted() private {
         hasInteracted[msg.sender] += 1;
+    }
+
+    // função que implementa transferência de valores entre 2 contas
+    // apenas para fins de estudo, já que a própria rede Ethereum já implementa essa transferência
+    function sendETH(address payable targetAddress) public payable {
+        // endereço payable faz transferência através do transfer
+        targetAddress.transfer(msg.value);
+    }
+
+    // função responsável pelo saque
+    function withdraw() public {
+        require(balances[msg.sender] > 0, "Insufficient funds");
+
+        uint amount = balances[msg.sender];
+        balances[msg.sender] = 0;
+        // necessário fazer conversão explícita
+        // payable(msg.sender)
+        // ver Breaking Changes da versão 0.8.3
+        payable(msg.sender).transfer(amount);
     }
 
     // função que soma 2 valores e retorna o resultado
