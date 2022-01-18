@@ -1,6 +1,57 @@
 pragma solidity 0.8.11;
 
+library SafeMath {
+
+    // função que soma 2 valores e retorna o resultado
+    // usa a palavra reservada "pure" pois não consulta e nem altera valores na Blockchain
+    function sum(uint a, uint b) internal pure returns(uint) {
+        uint c = 0;
+        // a partir da versão 0.8.0 o revert de overflow e
+        // underflow é feito por default - necessário usar
+        // o "unchecked" na operação
+        unchecked {
+            c = a + b;
+        }
+
+        // validação para garantir que não houve um overflow
+        require(c >= a, "Sum Overflow!");
+
+        return c;
+    }
+
+    // função que subtrai 2 valores e retorna o resultado
+    function sub(uint a, uint b) internal pure returns(uint) {
+        require(b <= a, "Sub Underflow!");
+        uint c = a - b;
+        return c;
+    }
+
+    // função que multiplica 2 valores e retorna o resultado
+    function mul(uint a, uint b) internal pure returns(uint) {
+        // if para que não ocorra erro no require para a = 0
+        if(a == 0){
+            return 0;
+        }
+
+        uint c = a * b;
+        require(c / a == b, "Mul Overflow!");
+
+        return c;
+    }
+
+    // função que divide 2 valores e retorna o resultado
+    function div(uint a, uint b) internal pure returns(uint) {
+        uint c = a / b;
+
+        return c;
+    }
+
+}
+
 contract HelloWorld {
+
+    using SafeMath for uint;
+
     string public text;
     uint public number;
     address public userAddress;
@@ -17,7 +68,7 @@ contract HelloWorld {
         require(msg.value >= 1 ether, "Insufficient ETH sent");
 
         // incrementa o saldo do endereço que chamou a função
-        balances[msg.sender] += msg.value;
+        balances[msg.sender] = balances[msg.sender].sum(msg.value);
 
         number = myNumber;
         setInteracted();
@@ -56,27 +107,6 @@ contract HelloWorld {
         payable(msg.sender).transfer(amount);
     }
 
-    // função que soma 2 valores e retorna o resultado
-    // usa a palavra reservada "pure" pois não consulta e nem altera valores na Blockchain
-    function sum(uint num1, uint num2) public pure returns(uint) {
-        return num1 + num2;
-    }
-
-    // função que subtrai 2 valores e retorna o resultado
-    function sub(uint num1, uint num2) public pure returns(uint) {
-        return num1 - num2;
-    }
-
-    // função que multiplica 2 valores e retorna o resultado
-    function mult(uint num1, uint num2) public pure returns(uint) {
-        return num1 * num2;
-    }
-
-    // função que divide 2 valores e retorna o resultado
-    function div(uint num1, uint num2) public pure returns(uint) {
-        return num1 / num2;
-    }
-
     // função que recebe 2 números e faz o primeiro elevado a potência do segundo, retornando o resultado
     function pow(uint num1, uint num2) public pure returns(uint) {
         return num1 ** num2;
@@ -85,6 +115,6 @@ contract HelloWorld {
     // função que soma 1 valor passado por parâmetro e um armazenado na Blockchain, retornando o resultado
     // usa a palavra reservada "view" pois apenas consulta valores na Blockchain, sem alterar
     function sumStored(uint num1) public view returns(uint) {
-        return num1 + number;
-    }   
+        return num1.sub(number);
+    }
 }
