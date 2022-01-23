@@ -48,18 +48,41 @@ library SafeMath {
 
 }
 
-contract HelloWorld {
+contract Ownable {
+    address payable public owner;
+
+    event OwnershipTransferred(address newOwner);
+
+    constructor () {
+        owner = payable(msg.sender);
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "You are not the owner!");
+        _;
+    }
+
+    // função disponível apenas para o dono que transfere
+    // o contrato para um outro dono, mesmo depois do deploy
+    function transferOwnership(address payable newOwner) onlyOwner public {
+        owner = newOwner;
+
+        emit OwnershipTransferred(owner);
+    }
+}
+
+contract HelloWorld is Ownable {
 
     using SafeMath for uint;
-
+    
     string public text;
     uint public number;
-    address public userAddress;
+    address payable public userAddress;
     bool public answer;
     mapping (address => uint) public hasInteracted;
     mapping (address => uint) public balances;
 
-    function setText(string memory myText) public {
+    function setText(string memory myText) onlyOwner public {
         text = myText;
         setInteracted();
     }
@@ -75,7 +98,7 @@ contract HelloWorld {
     }
 
     function setUserAddress() public {
-        userAddress = msg.sender;
+        userAddress = payable(msg.sender);
         setInteracted();
     }
 
