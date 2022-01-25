@@ -100,4 +100,11 @@ contract FirstChallenge is Ownable {
 
         emit NewPrice(price);
     }
+
+    function withdraw(uint myAmount) onlyOwner public {
+        // "balance" é uma propriedade nativa de todos ENDEREÇOS (inclusive endereços de contratos)
+        require(address(this).balance >= myAmount, "Insufficient funds.");
+
+        owner.transfer(myAmount);
+    }
 }
